@@ -11,6 +11,31 @@ pub enum TrialColour {
     Only(Colour),
 }
 
+impl TrialColour {
+    pub fn and_trial(&self, rhs: &TrialColour) -> TrialColour {
+        use TrialColour::{Unknown, Any, Maybe, Only};
+        match (*self, *rhs) {
+            (Unknown, _) => *rhs,
+            (_, Unknown) => *self,
+            (Only(_), _) => *self,
+            (_, Only(_)) => *rhs,
+            (Maybe(c1), Maybe(c2)) => if c1 == c2 { *self } else { Any },
+            (Any, _) => *self,
+            (_, Any) => *rhs,
+        }
+    }
+
+    pub fn and(&self, rhs: &Colour) -> TrialColour {
+        use TrialColour::{Unknown, Any, Maybe, Only};
+        match (*self, *rhs) {
+            (Unknown, colour) => Maybe(colour),
+            (Any, _) => Any,
+            (Maybe(c1), c2) => if c1 == c2 { *self } else { Any },
+            (Only(_), _) => *self,
+        }
+    }
+}
+
 pub struct Grid {
     width: usize,
     height: usize,
@@ -49,6 +74,7 @@ impl IndexMut<(usize, usize)> for Grid {
     }
 }
 
+#[derive(Clone, PartialEq, Eq)]
 pub struct TrialGrid {
     width: usize,
     height: usize,
@@ -60,6 +86,14 @@ impl TrialGrid {
         let mut cells = Vec::new();
         cells.resize(width * height, TrialColour::Unknown);
         Self { width, height, cells }
+    }
+
+    pub fn convert_maybe_to_only(&mut self) {
+        for cell in self.cells.iter_mut() {
+            if let TrialColour::Maybe(colour) = cell {
+                *cell = TrialColour::Only(*colour);
+            }
+        }
     }
 }
 
@@ -95,8 +129,9 @@ impl Display for TrialGrid {
                 }
                 match self[(row, col)] {
                     Unknown | Any => f.write_char('.')?,
-                    Maybe(Colour::Black) | Only(Colour::Black) => f.write_char('#')?,
-                    Maybe(Colour::White) | Only(Colour::White) => f.write_char('X')?,
+                    Maybe(_) => f.write_char('\'')?,
+                    Only(Colour::Black) => f.write_char('#')?,
+                    Only(Colour::White) => f.write_char('X')?,
                 }
             }
             f.write_char('\n')?;

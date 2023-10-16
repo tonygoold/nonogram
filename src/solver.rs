@@ -27,7 +27,7 @@ impl Solver {
         })
     }
 
-    pub fn solve(&mut self) -> TrialGrid {
+    pub fn solve_required(&mut self) -> TrialGrid {
         let mut rows_required = Vec::new();
         for row_solution_set in self.row_solution_sets.iter_mut() {
             row_solution_set.solve();
@@ -53,6 +53,72 @@ impl Solver {
                 }
             }
         }
+        grid
+    }
+
+    fn remove_incompatible_rows(&mut self, grid: &TrialGrid) {
+        for (row, solution_set) in self.row_solution_sets.iter_mut().enumerate() {
+            let mut removed: Vec<usize> = Vec::new();
+            for (i, solution) in solution_set.solved().iter().enumerate() {
+                let cells = solution.flatten();
+                let remove = cells.iter().enumerate().any(|(col, colour)| {
+                    if let TrialColour::Only(c) = grid[(row, col)] {
+                        c != *colour
+                    } else {
+                        false
+                    }
+                });
+                if remove {
+                    removed.push(i);
+                }
+            }
+            while let Some(i) = removed.pop() {
+                solution_set.remove(i);
+            }
+        }
+    }
+
+    fn remove_incompatible_cols(&mut self, grid: &TrialGrid) {
+        for (col, solution_set) in self.col_solution_sets.iter_mut().enumerate() {
+            let mut removed: Vec<usize> = Vec::new();
+            for (i, solution) in solution_set.solved().iter().enumerate() {
+                let cells = solution.flatten();
+                let remove = cells.iter().enumerate().any(|(row, colour)| {
+                    if let TrialColour::Only(c) = grid[(row, col)] {
+                        c != *colour
+                    } else {
+                        false
+                    }
+                });
+                if remove {
+                    removed.push(i);
+                }
+            }
+            while let Some(i) = removed.pop() {
+                solution_set.remove(i);
+            }
+        }
+    }
+
+    pub fn solve_incremental(&mut self, grid: &TrialGrid) -> TrialGrid {
+        self.remove_incompatible_rows(grid);
+        self.remove_incompatible_cols(grid);
+        let mut grid = grid.clone();
+        for (row, solution_set) in self.row_solution_sets.iter().enumerate() {
+            for solution in solution_set.solved().iter() {
+                for (col, colour) in solution.flatten().iter().enumerate() {
+                    grid[(row, col)] = grid[(row, col)].and(colour);
+                }
+            }
+        }
+        for (col, solution_set) in self.col_solution_sets.iter().enumerate() {
+            for solution in solution_set.solved().iter() {
+                for (row, colour) in solution.flatten().iter().enumerate() {
+                    grid[(row, col)] = grid[(row, col)].and(colour);
+                }
+            }
+        }
+        grid.convert_maybe_to_only();
         grid
     }
 }

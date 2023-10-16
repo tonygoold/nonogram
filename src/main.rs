@@ -12,6 +12,15 @@ fn main() {
         .expect(format!("Unable to open {}", &filename).as_str());
     let mut solver = read(file)
         .expect("Bad input or unsolvable");
-    let grid = solver.solve();
+    let mut grid = solver.solve_required();
     print!("Required solution:\n{}\n", &grid);
+    let mut solved = false;
+    let mut iterations = 0;
+    while ! solved && iterations < 10 {
+        let next_grid = solver.solve_incremental(&grid);
+        solved = next_grid == grid;
+        grid = next_grid;
+        iterations += 1;
+    }
+    print!("After {} iterations, solution:\n{}\n", iterations, &grid);
 }

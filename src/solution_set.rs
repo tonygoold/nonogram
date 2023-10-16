@@ -28,6 +28,10 @@ impl SolutionSet {
         }
     }
 
+    pub fn solved(&self) -> &[Solution] {
+        &self.solved
+    }
+
     pub fn required(&mut self) -> Vec<Option<Colour>> {
         let mut solved = self.solved.iter();
         let initial = solved.next().expect("Empty solution set");
@@ -43,5 +47,9 @@ impl SolutionSet {
             }
         }
         reqs
+    }
+
+    pub fn remove(&mut self, index: usize) {
+        self.solved.remove(index);
     }
 }

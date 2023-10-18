@@ -36,44 +36,6 @@ impl TrialColour {
     }
 }
 
-pub struct Grid {
-    width: usize,
-    height: usize,
-    cells: Vec<Colour>,
-}
-
-impl Grid {
-    pub fn new(width: usize, height: usize, colour: Colour) -> Self {
-        let mut cells = Vec::new();
-        cells.resize(width * height, colour);
-        Self { width, height, cells }
-    }
-
-    pub fn width(&self) -> usize {
-        self.width
-    }
-
-    pub fn height(&self) -> usize {
-        self.height
-    }
-}
-
-impl Index<(usize, usize)> for Grid {
-    type Output = Colour;
-
-    fn index(&self, index: (usize, usize)) -> &Self::Output {
-        let (row, col) = index;
-        &self.cells[row * self.width + col]        
-    }
-}
-
-impl IndexMut<(usize, usize)> for Grid {
-    fn index_mut(&mut self, index: (usize, usize)) -> &mut Self::Output {
-        let (row, col) = index;
-        &mut self.cells[row * self.width + col]
-    }
-}
-
 #[derive(Clone, PartialEq, Eq)]
 pub struct TrialGrid {
     width: usize,
@@ -136,10 +98,10 @@ impl Display for TrialGrid {
                     f.write_char('|')?;
                 }
                 match self[(row, col)] {
-                    Unknown | Any => f.write_char('.')?,
+                    Unknown | Any => f.write_char('?')?,
                     Maybe(_) => f.write_char('\'')?,
                     Only(Colour::Black) => f.write_char('#')?,
-                    Only(Colour::White) => f.write_char('X')?,
+                    Only(Colour::White) => f.write_char('.')?,
                 }
             }
             f.write_char('\n')?;

@@ -58,45 +58,15 @@ impl Solver {
 
     fn remove_incompatible_rows(&mut self, grid: &TrialGrid) {
         for (row, solution_set) in self.row_solution_sets.iter_mut().enumerate() {
-            let mut removed: Vec<usize> = Vec::new();
-            for (i, solution) in solution_set.solved().iter().enumerate() {
-                let cells = solution.flatten();
-                let remove = cells.iter().enumerate().any(|(col, colour)| {
-                    if let TrialColour::Only(c) = grid[(row, col)] {
-                        c != *colour
-                    } else {
-                        false
-                    }
-                });
-                if remove {
-                    removed.push(i);
-                }
-            }
-            while let Some(i) = removed.pop() {
-                solution_set.remove(i);
-            }
+            let line = grid.row(row);
+            solution_set.remove_incompatible(&line);
         }
     }
 
     fn remove_incompatible_cols(&mut self, grid: &TrialGrid) {
         for (col, solution_set) in self.col_solution_sets.iter_mut().enumerate() {
-            let mut removed: Vec<usize> = Vec::new();
-            for (i, solution) in solution_set.solved().iter().enumerate() {
-                let cells = solution.flatten();
-                let remove = cells.iter().enumerate().any(|(row, colour)| {
-                    if let TrialColour::Only(c) = grid[(row, col)] {
-                        c != *colour
-                    } else {
-                        false
-                    }
-                });
-                if remove {
-                    removed.push(i);
-                }
-            }
-            while let Some(i) = removed.pop() {
-                solution_set.remove(i);
-            }
+            let line = grid.col(col);
+            solution_set.remove_incompatible(&line);
         }
     }
 
@@ -104,6 +74,20 @@ impl Solver {
         self.remove_incompatible_rows(grid);
         self.remove_incompatible_cols(grid);
         let mut grid = grid.clone();
+        for (row, solution_set) in self.row_solution_sets.iter_mut().enumerate() {
+            for (col, opt_colour) in solution_set.required().iter().enumerate() {
+                if let Some(colour) = opt_colour {
+                    grid[(row, col)] = TrialColour::Only(*colour);
+                }
+            }
+        }
+        for (col, solution_set) in self.col_solution_sets.iter_mut().enumerate() {
+            for (row, opt_colour) in solution_set.required().iter().enumerate() {
+                if let Some(colour) = opt_colour {
+                    grid[(row, col)] = TrialColour::Only(*colour);
+                }
+            }
+        }
         for (row, solution_set) in self.row_solution_sets.iter().enumerate() {
             for solution in solution_set.solved().iter() {
                 for (col, colour) in solution.flatten().iter().enumerate() {

@@ -1,4 +1,5 @@
 use super::{Colour, SolutionError};
+use super::grid::TrialColour;
 use super::solution::Solution;
 
 pub struct SolutionSet {
@@ -25,6 +26,18 @@ impl SolutionSet {
                     self.partial.push(solution);
                 }
             }
+        }
+    }
+
+    pub fn remove_incompatible(&mut self, line: &[TrialColour]) {
+        let mut removed: Vec<usize> = Vec::new();
+        for (i, solution) in self.solved.iter().enumerate() {
+            if ! solution.is_compatible(line) {
+                removed.push(i);
+            }
+        }
+        while let Some(i) = removed.pop() {
+            self.solved.remove(i);
         }
     }
 

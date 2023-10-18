@@ -95,6 +95,14 @@ impl TrialGrid {
             }
         }
     }
+
+    pub fn row(&self, index: usize) -> Vec<TrialColour> {
+        (0..self.width).map(|col| self[(index, col)]).collect()
+    }
+
+    pub fn col(&self, index: usize) -> Vec<TrialColour> {
+        (0..self.height).map(|row| self[(row, index)]).collect()
+    }
 }
 
 impl Index<(usize, usize)> for TrialGrid {

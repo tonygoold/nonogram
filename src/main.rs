@@ -4,6 +4,8 @@ use std::fs::File;
 
 use nonograms::reader::read;
 
+const MAX_ITERS: usize = 1000;
+
 fn main() {
     let filename = env::args()
         .nth(1)
@@ -13,10 +15,9 @@ fn main() {
     let mut solver = read(file)
         .expect("Bad input or unsolvable");
     let mut grid = solver.solve_required();
-    print!("Required solution:\n{}\n", &grid);
     let mut solved = false;
     let mut iterations = 0;
-    while ! solved && iterations < 10 {
+    while ! solved && iterations < MAX_ITERS {
         let next_grid = solver.solve_incremental(&grid);
         solved = next_grid == grid;
         grid = next_grid;

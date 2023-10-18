@@ -9,13 +9,13 @@ pub enum SolutionError {
     NoSolutionExists,
 }
 
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum Colour {
     Black,
     White,
 }
 
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct Run {
     pub colour: Colour,
     pub length: usize,

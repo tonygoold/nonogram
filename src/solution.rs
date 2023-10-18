@@ -1,4 +1,5 @@
 use super::{Colour, Run, SolutionError};
+use super::grid::TrialColour;
 
 pub struct Solution {
     groups: Vec<usize>,
@@ -53,6 +54,17 @@ impl Solution {
             }
         }
         colours
+    }
+
+    pub fn is_compatible(&self, line: &[TrialColour]) -> bool {
+        let cells = self.flatten();
+        use TrialColour::{Unknown, Any, Maybe, Only};
+        return cells.iter().zip(line.iter()).all(|(a, b)| {
+            match *b {
+                Unknown | Any => true,
+                Maybe(c) | Only(c) => c == *a,
+            }
+        })
     }
 }
 

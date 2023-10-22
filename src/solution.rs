@@ -32,7 +32,9 @@ impl Solution {
         let base: usize = if self.runs.is_empty() { 0 } else { 1 };
         (0..=self.padding).map(|padding| {
             let mut runs = self.runs.clone();
-            runs.push(Run::white(base + padding));
+            if base + padding > 0 {
+                runs.push(Run::white(base + padding));
+            }
             runs.push(Run::black(group));
             Solution {
                 groups: self.groups.clone(),
@@ -46,23 +48,16 @@ impl Solution {
         self.groups.is_empty() && self.padding == 0
     }
 
-    pub fn flatten(&self) -> Vec<Colour> {
-        let mut colours = Vec::new();
-        for run in self.runs.iter() {
-            for _ in 0..run.length {
-                colours.push(run.colour);
-            }
-        }
-        colours
+    pub fn iter(&self) -> SolutionIter {
+        SolutionIter::new(self)
     }
 
     pub fn is_compatible(&self, line: &[TrialColour]) -> bool {
-        let cells = self.flatten();
         use TrialColour::{Unknown, Any, Maybe, Only};
-        return cells.iter().zip(line.iter()).all(|(a, b)| {
+        return self.iter().zip(line.iter()).all(|(a, b)| {
             match *b {
                 Unknown | Any => true,
-                Maybe(c) | Only(c) => c == *a,
+                Maybe(c) | Only(c) => c == a,
             }
         })
     }
@@ -78,5 +73,35 @@ impl std::fmt::Display for Solution {
             f.write_str(&s)?;
         }
         Ok(())
+    }
+}
+
+pub struct SolutionIter<'a> {
+    solution: &'a Solution,
+    run_index: usize,
+    run_offset: usize,
+}
+
+impl<'a> SolutionIter<'a> {
+    pub fn new(solution: &'a Solution) -> Self {
+        SolutionIter {
+            solution,
+            run_index: 0,
+            run_offset: 0,
+        }
+    }
+}
+
+impl Iterator for SolutionIter<'_> {
+    type Item = Colour;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let run = self.solution.runs.get(self.run_index)?;
+        self.run_offset += 1;
+        if self.run_offset >= run.length {
+            self.run_offset = 0;
+            self.run_index += 1;
+        }
+        Some(run.colour)
     }
 }

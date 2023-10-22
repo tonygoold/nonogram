@@ -90,15 +90,15 @@ impl Solver {
         }
         for (row, solution_set) in self.row_solution_sets.iter().enumerate() {
             for solution in solution_set.solved().iter() {
-                for (col, colour) in solution.flatten().iter().enumerate() {
-                    grid[(row, col)] = grid[(row, col)].and(colour);
+                for (col, colour) in solution.iter().enumerate() {
+                    grid[(row, col)] = grid[(row, col)].and(&colour);
                 }
             }
         }
         for (col, solution_set) in self.col_solution_sets.iter().enumerate() {
             for solution in solution_set.solved().iter() {
-                for (row, colour) in solution.flatten().iter().enumerate() {
-                    grid[(row, col)] = grid[(row, col)].and(colour);
+                for (row, colour) in solution.iter().enumerate() {
+                    grid[(row, col)] = grid[(row, col)].and(&colour);
                 }
             }
         }

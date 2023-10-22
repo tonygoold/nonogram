@@ -16,8 +16,7 @@ impl SolutionSet {
     }
 
     pub fn solve(&mut self) {
-        while ! self.partial.is_empty() {
-            let solution = self.partial.remove(0);
+        while let Some(solution) = self.partial.pop() {
             let solutions = solution.solve_iter();
             for solution in solutions {
                 if solution.is_complete() {
@@ -37,7 +36,7 @@ impl SolutionSet {
             }
         }
         while let Some(i) = removed.pop() {
-            self.solved.remove(i);
+            self.solved.swap_remove(i);
         }
     }
 
@@ -48,10 +47,10 @@ impl SolutionSet {
     pub fn required(&mut self) -> Vec<Option<Colour>> {
         let mut solved = self.solved.iter();
         let initial = solved.next().expect("Empty solution set");
-        let mut reqs: Vec<Option<Colour>> = initial.flatten().into_iter()
+        let mut reqs: Vec<Option<Colour>> = initial.iter()
             .map(Option::Some).collect();
         for solution in self.solved.iter().skip(1) {
-            for (i, colour) in solution.flatten().into_iter().enumerate() {
+            for (i, colour) in solution.iter().enumerate() {
                 if let Some(c) = reqs[i] {
                     if c != colour {
                         reqs[i] = None;

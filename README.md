@@ -1,21 +1,24 @@
 # About
 
-This is a solver for black and white nonograms. On my laptop, it can solve an average 20x20 nonogram in around 250 milliseconds, while a tricky 30x30 nonogram takes around 45 seconds.
+This is a solver for black and white nonograms. On an M1 Pro MacBook, it can solve an average 20x20 nonogram in around 150 milliseconds, while a tricky 30x30 nonogram takes around 1.5 seconds.
 
-I wrote this for fun, to see if I could write a nonogram solver without using external references. This project is not maintained.
+I wrote this for fun, to see if I could write a nonogram solver without using external references. This project is not maintained, although I may continue to optimize it from time to time.
 
 # Usage
 
+You will need to [install cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html) to build and run this project.
+
 ```
-nonograms [<input file>]
+cargo build --release
+./target/release/nonograms [<input file>]
 
 # OR
 
-cargo run -- [<input file>]
+cargo run --release -- [<input file>]
 
 ```
 
-If no input file is specified, it will look for a file named `nonogram.txt` in the current directory.
+If no input file is specified, it will look for a file named `nonogram.txt` in the current directory. You can also specify the maximum by providing a `--count <iterations>` argument. The default limit is 1,000 iterations. The tricky 30x30 nongram mentioned above only needs 35 iterations to solve.
 
 # Input File Format
 

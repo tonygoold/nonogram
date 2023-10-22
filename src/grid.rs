@@ -12,6 +12,13 @@ pub enum TrialColour {
 }
 
 impl TrialColour {
+    pub fn is_only(&self) -> bool {
+        match *self {
+            TrialColour::Only(_) => true,
+            _ => false,
+        }
+    }
+
     pub fn and_trial(&self, rhs: &TrialColour) -> TrialColour {
         use TrialColour::{Unknown, Any, Maybe, Only};
         match (*self, *rhs) {
@@ -48,6 +55,18 @@ impl TrialGrid {
         let mut cells = Vec::new();
         cells.resize(width * height, TrialColour::Unknown);
         Self { width, height, cells }
+    }
+
+    pub fn width(&self) -> usize {
+        self.width
+    }
+
+    pub fn height(&self) -> usize {
+        self.height
+    }
+
+    pub fn solved(&self) -> bool {
+        self.cells.iter().all(TrialColour::is_only)
     }
 
     pub fn convert_maybe_to_only(&mut self) {

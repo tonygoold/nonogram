@@ -1,27 +1,45 @@
-use std::env;
-use std::format;
 use std::fs::File;
 
+use clap::Parser;
+
+use nonograms::blockdisplay::BlockDisplay;
 use nonograms::reader::read;
 
 const MAX_ITERS: usize = 1000;
 
+#[derive(Debug, Parser)]
+struct Args {
+    /// Maximum number of iterations
+    #[arg(short, long, default_value_t = MAX_ITERS)]
+    count: usize,
+
+    /// The file to parse
+    filename: Option<String>,
+}
+
 fn main() {
-    let filename = env::args()
-        .nth(1)
-        .unwrap_or("nonogram.txt".to_owned());
-    let file = File::open(&filename)
-        .expect(format!("Unable to open {}", &filename).as_str());
-    let mut solver = read(file)
-        .expect("Bad input or unsolvable");
+    let args = Args::parse();
+    let file = args.filename.map(
+        |name| File::open(&name).expect("Unable to read file")
+    );
+    let mut solver = if let Some(file) = file {
+        read(file)
+    } else {
+        read(std::io::stdin())
+    }.expect("Bad input or unsolvable");
     let mut grid = solver.solve_required();
-    let mut solved = false;
     let mut iterations = 0;
-    while ! solved && iterations < MAX_ITERS {
-        let next_grid = solver.solve_incremental(&grid);
-        solved = next_grid == grid;
-        grid = next_grid;
+    while iterations < args.count {
+        grid = solver.solve_incremental(&grid);
+        if grid.solved() {
+            break;
+        }
         iterations += 1;
     }
-    print!("After {} iterations, solution:\n{}\n", iterations, &grid);
+    let display = BlockDisplay::new(&grid);
+    if grid.solved() {
+        print!("After {} iterations, solution:\n{}\n", iterations, &display);
+    } else {
+        print!("After {} iterations, partial solution:\n{}\n", iterations, &display);
+    }
 }

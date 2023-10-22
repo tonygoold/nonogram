@@ -1,3 +1,4 @@
+pub mod blockdisplay;
 pub mod grid;
 pub mod reader;
 pub mod solution;
